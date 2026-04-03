@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
-import com.kaixinchen.githubclient.data.remote.GithubApiService
+import com.kaixinchen.githubclient.data.repository.GithubRepository
 import com.kaixinchen.githubclient.ui.theme.GithubClientTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -22,7 +22,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var apiService: GithubApiService
+    lateinit var repository: GithubRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +31,14 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 Log.d("API_TEST", "Starting GitHub API request...")
-                val response = apiService.searchRepos(query = "language:kotlin")
-                Log.d("API_TEST", "Request succeeded! Found ${response.totalCount} repositories")
-                Log.d("API_TEST", "First repository: ${response.items.firstOrNull()?.fullName}")
+                val result = repository.searchRepositories(query = "language:kotlin")
+                if (result.isSuccess) {
+                    val repos = result.getOrThrow()
+                    Log.d("API_TEST", "Request succeeded! Found ${repos.size} repositories")
+                    Log.d("API_TEST", "First repository: ${repos.firstOrNull()?.fullName}")
+                } else {
+                    Log.e("API_TEST", "Request failed: ${result.exceptionOrNull()?.message}")
+                }
             } catch (e: Exception) {
                 Log.e("API_TEST", "Request failed: ${e.message}", e)
             }
