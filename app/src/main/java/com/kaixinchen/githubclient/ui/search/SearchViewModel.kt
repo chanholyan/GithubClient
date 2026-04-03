@@ -28,10 +28,10 @@ class SearchViewModel @Inject constructor(
     fun search() {
         val query = _searchQuery.value
         if (query.isBlank()) return
-
         viewModelScope.launch {
             _uiState.value = SearchUiState.Loading
 
+            // Search for the language, e.g. pass "kotlin" and will format as "language:kotlin"
             val formattedQuery = "language:$query"
 
             val result = repository.searchRepositories(formattedQuery)

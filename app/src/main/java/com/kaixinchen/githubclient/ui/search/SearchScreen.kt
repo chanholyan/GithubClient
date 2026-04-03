@@ -1,5 +1,6 @@
 package com.kaixinchen.githubclient.ui.search
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,7 +19,8 @@ import com.kaixinchen.githubclient.data.model.Repo
 
 @Composable
 fun SearchScreen(
-    viewModel: SearchViewModel = hiltViewModel()
+    viewModel: SearchViewModel = hiltViewModel(),
+    onRepoClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -61,7 +63,7 @@ fun SearchScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(state.repos) {
-                        RepoItem(repo = it)
+                        RepoItem(repo = it, onClick = { onRepoClick(it.htmlUrl) })
                     }
                 }
             }
@@ -70,9 +72,14 @@ fun SearchScreen(
 }
 
 @Composable
-fun RepoItem(repo: Repo) {
+fun RepoItem(
+    repo: Repo,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
