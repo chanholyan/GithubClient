@@ -2,6 +2,7 @@ package com.kaixinchen.githubclient.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaixinchen.githubclient.data.local.AuthManager
 import com.kaixinchen.githubclient.data.repository.GithubRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val repository: GithubRepository
+    private val repository: GithubRepository,
+    private val authManager: AuthManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
@@ -45,5 +47,9 @@ class SearchViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    fun logout() {
+        authManager.clearToken()
     }
 }

@@ -1,8 +1,5 @@
 package com.kaixinchen.githubclient.di
 
-import com.kaixinchen.githubclient.data.remote.GithubApiService
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,6 +8,10 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import com.squareup.moshi.Moshi
+import com.kaixinchen.githubclient.data.remote.GithubApiService
+import com.kaixinchen.githubclient.data.local.AuthManager
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import javax.inject.Singleton
 
 @Module
@@ -19,15 +20,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(authManager: AuthManager): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -38,9 +31,22 @@ object NetworkModule {
                 val originalRequest = chain.request()
                 val requestBuilder = originalRequest.newBuilder()
                     .addHeader("Accept", "application/vnd.github.v3+json")
+                
+                val token = authManager.getToken()
+                if (!token.isNullOrBlank()) {
+                    requestBuilder.addHeader("Authorization", "Bearer $token")
+                }
 
                 chain.proceed(requestBuilder.build())
             }
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMoshi(): Moshi {
+        return Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
             .build()
     }
 

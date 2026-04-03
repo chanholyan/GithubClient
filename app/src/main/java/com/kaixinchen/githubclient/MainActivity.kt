@@ -16,12 +16,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLEncoder
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import com.kaixinchen.githubclient.data.local.AuthManager
+import com.kaixinchen.githubclient.ui.auth.LoginScreen
 import com.kaixinchen.githubclient.ui.search.SearchScreen
 import com.kaixinchen.githubclient.ui.detail.RepoDetailScreen
 import com.kaixinchen.githubclient.ui.theme.GithubClientTheme
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var authManager: AuthManager
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -32,7 +38,22 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
 
-                    NavHost(navController = navController, startDestination = "search") {
+                    // Dynamically determine starting page
+                    val startRoute = if (authManager.isLoggedIn()) "search" else "login"
+
+                    NavHost(navController = navController, startDestination = startRoute) {
+                        composable("login") {
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    // After successful login, navigate to search page and clear login page from stack
+                                    // This prevents going back to login page when pressing back button
+                                    navController.navigate("search") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+
                         composable("search") {
                             SearchScreen(
                                 onRepoClick = { url ->
@@ -40,6 +61,13 @@ class MainActivity : ComponentActivity() {
                                     // So must encode it first before passing to the detail screen
                                     val encodedUrl = URLEncoder.encode(url, StandardCharsets.UTF_8.toString())
                                     navController.navigate("detail/$encodedUrl")
+                                },
+                                onLogout = {
+                                    navController.navigate("login") {
+                                        // Clear all history from stack when navigating back to login
+                                        // This prevents going back to main page when pressing back button
+                                        popUpTo(0) { inclusive = true }
+                                    }
                                 }
                             )
                         }

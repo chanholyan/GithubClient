@@ -12,4 +12,6 @@ interface GithubApiService {
         @Query("sort") sort: String = "stars"
     ): RepoSearchResponse
 
+    @GET("user/repos")
+    suspend fun getMyRepos()
 }

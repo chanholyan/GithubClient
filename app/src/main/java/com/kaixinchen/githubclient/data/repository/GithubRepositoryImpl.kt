@@ -18,4 +18,13 @@ class GithubRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun getMyRepositories(): Result<Unit> {
+        return try {
+            apiService.getMyRepos()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
