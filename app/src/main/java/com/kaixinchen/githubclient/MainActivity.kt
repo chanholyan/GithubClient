@@ -146,6 +146,7 @@ fun MainScreen(
             }
             composable("profile") {
                 ProfileScreen(
+                    isLoggedIn = isLoggedIn,
                     onRepoClick = onNavigateToDetail,
                     onLoginClick = onNavigateToLogin
                 )

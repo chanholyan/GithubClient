@@ -15,9 +15,14 @@ import com.kaixinchen.githubclient.ui.search.RepoItem
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
+    isLoggedIn: Boolean,
     onRepoClick: (String) -> Unit,
     onLoginClick: () -> Unit
 ) {
+    LaunchedEffect(isLoggedIn) {
+        viewModel.fetchMyRepos()
+    }
+
     val uiState by viewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {

@@ -36,17 +36,18 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun fetchMyRepos() {
+    fun fetchMyRepos() {
+        if (!authManager.isLoggedIn()) {
+            _uiState.value = ProfileUiState.NotLoggedIn
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = ProfileUiState.Loading
             val result = repository.getMyRepositories()
             result.fold(
-                onSuccess = { repos ->
-                    _uiState.value = ProfileUiState.Success(repos)
-                },
-                onFailure = { error ->
-                    _uiState.value = ProfileUiState.Error(error.message ?: "Failed to load repos")
-                }
+                onSuccess = { repos -> _uiState.value = ProfileUiState.Success(repos) },
+                onFailure = { error -> _uiState.value = ProfileUiState.Error(error.message ?: "Failed to load repos") }
             )
         }
     }
