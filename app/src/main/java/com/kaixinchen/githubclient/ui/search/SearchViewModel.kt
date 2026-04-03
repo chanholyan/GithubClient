@@ -17,11 +17,15 @@ class SearchViewModel @Inject constructor(
     private val authManager: AuthManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
+    private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Loading)
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    init {
+        fetchPopularRepos()
+    }
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
@@ -49,7 +53,15 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun logout() {
-        authManager.clearToken()
+    private fun fetchPopularRepos() {
+        viewModelScope.launch {
+            _uiState.value = SearchUiState.Loading
+            // Search for top projects with more than 50,000 stars
+            val result = repository.searchRepositories("stars:>50000")
+            result.fold(
+                onSuccess = { repos -> _uiState.value = SearchUiState.Success(repos) },
+                onFailure = { error -> _uiState.value = SearchUiState.Error(error.message ?: "Unknown Error") }
+            )
+        }
     }
 }

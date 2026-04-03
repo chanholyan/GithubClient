@@ -2,6 +2,7 @@ package com.kaixinchen.githubclient.data.repository
 
 import com.kaixinchen.githubclient.data.model.Repo
 import com.kaixinchen.githubclient.data.remote.GithubApiService
+import com.kaixinchen.githubclient.data.remote.IssueRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,9 +20,18 @@ class GithubRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getMyRepositories(): Result<Unit> {
+    override suspend fun getMyRepositories(): Result<List<Repo>> {
         return try {
-            apiService.getMyRepos()
+            val response = apiService.getMyRepos()
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun createIssue(owner: String, repo: String, title: String, body: String): Result<Unit> {
+        return try {
+            apiService.createIssue(owner, repo, IssueRequest(title, body))
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

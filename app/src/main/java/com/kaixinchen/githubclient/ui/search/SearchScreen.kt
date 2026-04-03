@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -21,8 +20,10 @@ import com.kaixinchen.githubclient.data.model.Repo
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
+    isLoggedIn: Boolean,
     onRepoClick: (String) -> Unit,
-    onLogout: () -> Unit
+    onLoginClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -33,20 +34,16 @@ fun SearchScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "GitHub Search",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            IconButton(onClick = {
-                viewModel.logout() 
-                onLogout()
-            }) {
-                Icon(
-                    imageVector = Icons.Default.ExitToApp,
-                    contentDescription = "Sign Out",
-                    tint = MaterialTheme.colorScheme.error
-                )
+            Text("GitHub Explore", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            
+            if (isLoggedIn) {
+                TextButton(onClick = onLogoutClick) {
+                    Text("Sign Out", color = MaterialTheme.colorScheme.error)
+                }
+            } else {
+                Button(onClick = onLoginClick) {
+                    Text("Sign In")
+                }
             }
         }
 
@@ -84,12 +81,23 @@ fun SearchScreen(
                 }
             }
             is SearchUiState.Success -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(state.repos) {
-                        RepoItem(repo = it, onClick = { onRepoClick(it.htmlUrl) })
+                val listTitle = if (searchQuery.isBlank()) "🔥 Popular Repositories" else "🔍 Search Results"
+                
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = listTitle,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.repos) { repo ->
+                            RepoItem(repo = repo, onClick = { onRepoClick(repo.htmlUrl) })
+                        }
                     }
                 }
             }

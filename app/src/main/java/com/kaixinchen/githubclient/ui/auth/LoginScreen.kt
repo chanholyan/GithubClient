@@ -13,6 +13,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onSkipLogin: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val tokenInput by viewModel.tokenInput.collectAsState()
@@ -61,6 +62,15 @@ fun LoginScreen(
             } else {
                 Text("Login")
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(
+            onClick = onSkipLogin,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Skip for now")
         }
     }
 }
