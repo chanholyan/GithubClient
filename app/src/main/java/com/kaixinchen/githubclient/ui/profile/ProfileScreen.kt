@@ -14,7 +14,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kaixinchen.githubclient.ui.search.RepoItem
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.ExperimentalMaterialApi
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
@@ -114,18 +119,35 @@ fun ProfileScreen(
                 }
             }
             is ProfileUiState.Success -> {
+                val isRefreshing = uiState is ProfileUiState.Loading
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = isRefreshing,
+                    onRefresh = { viewModel.fetchMyRepos() }
+                )
+                
                 if (state.repos.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("You don't have any repositories yet.")
                     }
                 } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(state.repos) {
-                            RepoItem(repo = it, onClick = { onRepoClick(it.htmlUrl) })
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(
+                                items = state.repos,
+                                key = { it.id }
+                            ) {
+                                RepoItem(repo = it, onClick = { onRepoClick(it.htmlUrl) })
+                            }
                         }
+                        
+                        PullRefreshIndicator(
+                            refreshing = isRefreshing,
+                            state = pullRefreshState,
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
                     }
                 }
             }

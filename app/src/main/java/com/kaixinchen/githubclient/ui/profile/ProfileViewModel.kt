@@ -1,14 +1,16 @@
 package com.kaixinchen.githubclient.ui.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaixinchen.githubclient.data.model.Repo
+import com.kaixinchen.githubclient.data.local.AuthManager
+import com.kaixinchen.githubclient.data.repository.GithubRepository
+import com.kaixinchen.githubclient.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.kaixinchen.githubclient.data.model.Repo
-import com.kaixinchen.githubclient.data.local.AuthManager
-import com.kaixinchen.githubclient.data.repository.GithubRepository
 import javax.inject.Inject
 
 sealed interface ProfileUiState {
@@ -44,11 +46,15 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.value = ProfileUiState.Loading
-            val result = repository.getMyRepositories()
-            result.fold(
-                onSuccess = { repos -> _uiState.value = ProfileUiState.Success(repos) },
-                onFailure = { error -> _uiState.value = ProfileUiState.Error(error.message ?: "Failed to load repos") }
-            )
+            try {
+                val result = repository.getMyRepositories()
+                result.fold(
+                    onSuccess = { repos -> _uiState.value = ProfileUiState.Success(repos) },
+                    onFailure = { error -> _uiState.value = ProfileUiState.Error(error.message ?: Constants.Error.DEFAULT_ERROR_MESSAGE) }
+                )
+            } catch (e: Exception) {
+                _uiState.value = ProfileUiState.Error(e.message ?: Constants.Error.UNKNOWN_ERROR_MESSAGE)
+            }
         }
     }
 }

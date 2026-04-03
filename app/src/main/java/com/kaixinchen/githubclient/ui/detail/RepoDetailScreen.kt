@@ -54,17 +54,19 @@ fun RepoDetailScreen(
     ) {
         innerPadding ->
         AndroidView(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             factory = { ctx ->
                 WebView(ctx).apply {
                     webViewClient = WebViewClient()
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
-                    settings.userAgentString = "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36"
                     loadUrl(url)
                 }
             },
-            update = { it.loadUrl(url) }
+            update = {
+            }
         )
     }
 
@@ -91,7 +93,9 @@ fun RepoDetailScreen(
                         value = body,
                         onValueChange = { body = it },
                         label = { Text("Description (Optional)") },
-                        modifier = Modifier.fillMaxWidth().height(120.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
                         maxLines = 5
                     )
                 }

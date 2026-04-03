@@ -11,6 +11,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import com.squareup.moshi.Moshi
 import com.kaixinchen.githubclient.data.remote.GithubApiService
 import com.kaixinchen.githubclient.data.local.AuthManager
+import com.kaixinchen.githubclient.util.Constants
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import javax.inject.Singleton
 
@@ -30,11 +31,11 @@ object NetworkModule {
             .addInterceptor { chain ->
                 val originalRequest = chain.request()
                 val requestBuilder = originalRequest.newBuilder()
-                    .addHeader("Accept", "application/vnd.github.v3+json")
+                    .addHeader("Accept", Constants.GitHub.API_VERSION)
                 
                 val token = authManager.getToken()
                 if (!token.isNullOrBlank()) {
-                    requestBuilder.addHeader("Authorization", "Bearer $token")
+                    requestBuilder.addHeader(Constants.GitHub.AUTH_HEADER, "${Constants.GitHub.AUTH_PREFIX} $token")
                 }
 
                 chain.proceed(requestBuilder.build())
@@ -54,7 +55,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://api.github.com/")
+            .baseUrl(Constants.GitHub.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()

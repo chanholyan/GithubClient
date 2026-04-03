@@ -26,7 +26,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.kaixinchen.githubclient.data.model.Owner
 import com.kaixinchen.githubclient.data.model.Repo
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.ExperimentalMaterialApi
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
@@ -118,7 +123,7 @@ fun SearchScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                     
                     Button(
-                        onClick = { viewModel.search() },
+                        onClick = { viewModel.retry() },
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
                     ) {
                         Text("Try Again")
@@ -127,23 +132,39 @@ fun SearchScreen(
             }
             is SearchUiState.Success -> {
                 val listTitle = if (searchQuery.isBlank()) "🔥 Popular Repositories" else "🔍 Search Results"
+                val isRefreshing = uiState is SearchUiState.Loading
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = isRefreshing,
+                    onRefresh = { viewModel.retry() }
+                )
                 
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = listTitle,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(state.repos) { repo ->
-                            RepoItem(repo = repo, onClick = { onRepoClick(repo.htmlUrl) })
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(modifier = Modifier.fillMaxSize().pullRefresh(pullRefreshState)) {
+                        Text(
+                            text = listTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(
+                                items = state.repos,
+                                key = { it.id }
+                            ) { repo ->
+                                RepoItem(repo = repo, onClick = { onRepoClick(repo.htmlUrl) })
+                            }
                         }
                     }
+                    
+                    PullRefreshIndicator(
+                        refreshing = isRefreshing,
+                        state = pullRefreshState,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
                 }
             }
         }

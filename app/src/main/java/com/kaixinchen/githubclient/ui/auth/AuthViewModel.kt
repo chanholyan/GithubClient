@@ -2,12 +2,13 @@ package com.kaixinchen.githubclient.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaixinchen.githubclient.data.local.AuthManager
+import com.kaixinchen.githubclient.data.repository.GithubRepository
+import com.kaixinchen.githubclient.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.kaixinchen.githubclient.data.local.AuthManager
-import com.kaixinchen.githubclient.data.repository.GithubRepository
 import javax.inject.Inject
 
 sealed interface LoginState {
@@ -36,8 +37,22 @@ class AuthViewModel @Inject constructor(
     }
 
     fun login(onSuccess: () -> Unit) {
-        val token = _tokenInput.value
-        if (token.isBlank()) return
+        val token = _tokenInput.value.trim()
+        
+        if (token.isBlank()) {
+            _loginState.value = LoginState.Error("Token cannot be empty")
+            return
+        }
+        
+        if (token.length < Constants.Validation.MIN_TOKEN_LENGTH) {
+            _loginState.value = LoginState.Error("Token is too short. Please enter a valid GitHub Personal Access Token.")
+            return
+        }
+        
+        if (token.length > Constants.Validation.MAX_TOKEN_LENGTH) {
+            _loginState.value = LoginState.Error("Token is too long. Please enter a valid GitHub Personal Access Token.")
+            return
+        }
 
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
@@ -53,7 +68,7 @@ class AuthViewModel @Inject constructor(
                 },
                 onFailure = {
                     authManager.clearToken()
-                    _loginState.value = LoginState.Error("Invalid Token! Please check and try again.")
+                    _loginState.value = LoginState.Error(Constants.Error.AUTH_ERROR_MESSAGE)
                 }
             )
         }
