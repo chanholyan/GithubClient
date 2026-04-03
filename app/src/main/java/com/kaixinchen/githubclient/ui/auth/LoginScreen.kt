@@ -37,7 +37,11 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             enabled = loginState !is LoginState.Loading,
-            isError = loginState is LoginState.Error
+            isError = loginState is LoginState.Error,
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+            )
         )
 
         if (loginState is LoginState.Error) {
@@ -55,22 +59,20 @@ fun LoginScreen(
         Button(
             onClick = { viewModel.login(onSuccess = onLoginSuccess) },
             modifier = Modifier.fillMaxWidth().height(50.dp),
-            enabled = tokenInput.isNotBlank() && loginState !is LoginState.Loading
+            enabled = tokenInput.isNotBlank() && loginState !is LoginState.Loading,
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
         ) {
             if (loginState is LoginState.Loading) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
             } else {
-                Text("Login")
+                Text("Sign In", fontWeight = FontWeight.SemiBold)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(
-            onClick = onSkipLogin,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Skip for now")
+        TextButton(onClick = onSkipLogin) {
+            Text("Continue as Guest", fontWeight = FontWeight.Medium)
         }
     }
 }

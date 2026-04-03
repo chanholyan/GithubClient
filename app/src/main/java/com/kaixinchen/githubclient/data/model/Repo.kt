@@ -17,5 +17,12 @@ data class Repo(
     val description: String?,
     @Json(name = "stargazers_count") val stargazersCount: Int,
     val language: String?,
-    @Json(name = "html_url") val htmlUrl: String
+    @Json(name = "html_url") val htmlUrl: String,
+    val owner: Owner
+)
+
+@JsonClass(generateAdapter = true)
+data class Owner(
+    val login: String,
+    @Json(name = "avatar_url") val avatarUrl: String
 )
