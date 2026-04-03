@@ -181,13 +181,13 @@ fun RepoItem(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .clickable { onClick() },
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp), // 🌟 12dp：不多不少的现代圆角
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface, // 自动适配深浅色模式
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
         border = androidx.compose.foundation.BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant // 🌟 极细且柔和的边框线
+            color = MaterialTheme.colorScheme.outlineVariant
         )
     ) {
         Column(
@@ -195,7 +195,6 @@ fun RepoItem(
         ) {
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // 🌟 Use real developer avatar instead of gray book icon
                 AsyncImage(
                     model = repo.owner.avatarUrl,
                     contentDescription = "Owner Avatar",
@@ -225,8 +224,8 @@ fun RepoItem(
                 Text(
                     text = repo.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant, // 次要文字颜色
-                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f, // 稍微增加行高，提升阅读体验
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -249,12 +248,12 @@ fun RepoItem(
                     fontWeight = FontWeight.Medium
                 )
 
-                Spacer(modifier = Modifier.width(16.dp)) // 拉开一点间距
+                Spacer(modifier = Modifier.width(16.dp))
 
                 if (!repo.language.isNullOrBlank()) {
                     Surface(
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f) // 半透明底色，不抢眼
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
                     ) {
                         Text(
                             text = repo.language,
